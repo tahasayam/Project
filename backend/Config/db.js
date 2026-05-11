@@ -1,25 +1,48 @@
-const sql = require('mssql');
+const { Pool } = require('pg');
 require('dotenv').config();
 
-const config = {
-    user: process.env.DB_USER,
-    password: process.env.DB_PWD,
-    server: process.env.DB_SERVER,
-    database: process.env.DB_NAME,
-    port: Number(process.env.DB_PORT),
-    options: {
-        encrypt: false, // Set to false for better compatibility with local instances
-        trustServerCertificate: true,
-        enableArithAbort: true
+// Use DATABASE_URL from environment variables (provided by Render)
+const connectionString = process.env.DATABASE_URL;
+
+const pool = new Pool({
+    connectionString: connectionString,
+    ssl: {
+        rejectUnauthorized: false // Required for Render's hosted PostgreSQL
     }
-};
+});
 
-const poolPromise = new sql.ConnectionPool(config)
-    .connect()
-    .then(pool => {
-        console.log('✅ Connected to SQL Server');
-        return pool;
-    })
-    .catch(err => console.log('❌ Database Connection Failed: ', err));
+// Compatibility wrapper to make pg look like mssql for simple queries
+const poolPromise = (async () => {
+    try {
+        const client = await pool.connect();
+        console.log('✅ Connected to PostgreSQL');
+        client.release();
+        
+        // Return an object that mimics the mssql pool object
+        return {
+            request: () => ({
+                query: async (queryString) => {
+                    const result = await pool.query(queryString);
+                    return {
+                        recordset: result.rows,
+                        rowsAffected: [result.rowCount]
+                    };
+                },
+                input: function() { return this; } // Mock mssql input() for simple parameterized queries if needed
+            }),
+            query: async (queryString) => {
+                const result = await pool.query(queryString);
+                return {
+                    recordset: result.rows,
+                    rowsAffected: [result.rowCount]
+                };
+            }
+        };
+    } catch (err) {
+        console.error('❌ Database Connection Failed: ', err);
+        throw err;
+    }
+})();
 
-module.exports = { sql, poolPromise };
+// We export sql as an empty object or mock if needed, but primarily poolPromise
+module.exports = { sql: {}, poolPromise };
