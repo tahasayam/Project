@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>School SMS – Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../css/admin/style.css" />
+</head>
+
+<body>
+
+  <!-- ═══════════ SIDEBAR ═══════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">🎓</div>
+      School SMS
+    </div>
+
+    <nav>
+      <a class="nav-item active" href="#" data-page="dashboard">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <rect x="3" y="3" width="7" height="7" rx="1" />
+          <rect x="14" y="3" width="7" height="7" rx="1" />
+          <rect x="3" y="14" width="7" height="7" rx="1" />
+          <rect x="14" y="14" width="7" height="7" rx="1" />
+        </svg>
+        Dashboard
+      </a>
+      <a class="nav-item" href="#" data-page="classes">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+        </svg>
+        Classes
+      </a>
+      <a class="nav-item" href="#" data-page="teachers">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+        </svg>
+        Teachers
+      </a>
+      <a class="nav-item" href="#" data-page="students">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
+        </svg>
+        Students
+      </a>
+      <a class="nav-item" href="#" data-page="attendance">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z" />
+        </svg>
+        Attendance
+      </a>
+      <a class="nav-item" href="#" data-page="results">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" />
+        </svg>
+        Results
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar">D</div>
+        <div>
+          <div class="user-name">Dr. Sarah Johnson</div>
+          <div class="user-role">Admin</div>
+        </div>
+      </div>
+      <button class="logout-btn" id="logoutBtn">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
+        </svg>
+        Logout
+      </button>
+    </div>
+  </aside>
+
+  <!-- ═══════════ MAIN ═══════════ -->
+  <div class="main">
+    <div class="topbar">
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <h1 id="pageTitle">Admin Dashboard</h1>
+        <span class="admin-badge">Admin</span>
+      </div>
+      <a href="../login.html"
+        style="padding: 8px 16px; background-color: #1a1a2e; color: white; text-decoration: none; border-radius: 8px; font-weight: 500; font-size: 14px; display: inline-flex; align-items: center; transition: background 0.2s;">
+        ⬅ Back to Login
+      </a>
+    </div>
+
+    <div class="content">
+
+      <!-- ── DASHBOARD PAGE ── -->
+      <div class="page active" id="page-dashboard">
+
+        <!-- Stat Cards -->
+        <div class="stats-grid">
+          <div class="stat-card" onclick="showToast('👥', 'Total Students: 247')">
+            <div>
+              <div class="stat-label">Total Students</div>
+              <div class="stat-value">0</div>
+              <!-- <div class="stat-change">▲ +8% vs last month</div> -->
+            </div>
+            <div class="stat-icon icon-blue">👥</div>
+          </div>
+          <div class="stat-card" onclick="showToast('👨‍🏫', 'Total Teachers: 18')">
+            <div>
+              <div class="stat-label">Total Teachers</div>
+              <div class="stat-value">0</div>
+              <!-- <div class="stat-change">▲ +1 vs last month</div> -->
+            </div>
+            <div class="stat-icon icon-teal">👨‍🏫</div>
+          </div>
+          <div class="stat-card" onclick="showToast('📖', 'Active Classes: 12')">
+            <div>
+              <div class="stat-label">Active Classes</div>
+              <div class="stat-value">0</div>
+              <!-- <div class="stat-change">▲ +1 vs last month</div> -->
+            </div>
+            <div class="stat-icon icon-orange">📖</div>
+          </div>
+          <div class="stat-card" onclick="showToast('📋', 'Today\'s Attendance: 83.6%')">
+            <div>
+              <div class="stat-label">Today's Attendance</div>
+              <div class="stat-value">0%</div>
+              <!-- <div class="stat-change">▲ +0.8% vs last month</div> -->
+            </div>
+            <div class="stat-icon icon-indigo">📋</div>
+          </div>
+        </div>
+
+
+      </div>
+
+      <!-- ── OTHER PAGES ── -->
+      <div class="page" id="page-classes">
+        <div class="page-placeholder">
+          <div class="page-icon">📖</div>
+          <h2>Classes</h2>
+          <p>Manage all primary classes and sections here.</p>
+          <button class="btn-primary" onclick="openModal('create-class')" style="margin-top: 20px; max-width: 200px;">📖
+            Create Class</button>
+        </div>
+      </div>
+      <div class="page" id="page-teachers">
+        <div class="page-placeholder">
+          <div class="page-icon">👨‍🏫</div>
+          <h2>Teachers</h2>
+          <p>View and manage all teacher records.</p>
+
+          <div style="display:flex; justify-content:center; gap:15px; margin-top:20px;">
+            <button class="btn-primary" onclick="openModal('add-teacher')" style="max-width: 200px;">➕ Add Teacher</button>
+            <button class="btn-primary" onclick="openModal('assign-teacher')" style="max-width: 200px; background:#6366f1;">🎯 Manage Assignments</button>
+            <button class="btn-primary" onclick="openModal('delete-teacher')" style="max-width: 200px; background:#ef4444;">🗑 Delete Teacher</button>
+          </div>
+
+          <div style="margin-top: 30px; width: 100%; max-width: 900px; margin-left: auto; margin-right: auto; padding: 0 10px;">
+            <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+              <tbody id="admin-teacher-list-body">
+                <!-- Loaded via JS -->
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      </div>
+      <div class="page" id="page-students">
+        <div class="page-placeholder">
+          <div class="page-icon">👥</div>
+          <h2>Students</h2>
+          <p>View and manage all student records.</p>
+          <div style="display:flex; justify-content:center; gap:15px; margin-top:20px;">
+
+            <button class="btn-primary" onclick="openModal('add-student')" style="max-width: 200px;">
+              ➕ Add Student
+            </button>
+
+            <button class="btn-primary" onclick="openModal('delete-student')"
+              style="max-width: 200px; background:#ef4444;">
+              🗑 Delete Student
+            </button>
+
+          </div>
+        </div>
+      </div>
+      <div class="page" id="page-attendance">
+        <div class="page-placeholder">
+          <div class="page-icon">📋</div>
+          <h2>Attendance Management</h2>
+          <p>Manage attendance for both teachers and students.</p>
+          <div style="display:flex; justify-content:center; gap: 15px; margin-top: 25px;">
+            <button class="btn-primary"
+              onclick="openModal('teacher-attendance'); document.getElementById('ta-roster').style.display='none'; document.getElementById('ta-date').valueAsDate = new Date();"
+              style="flex:1; max-width:200px; background-color: #00b894;">👨‍🏫 Teacher Attendance</button>
+            <button class="btn-primary"
+              onclick="openModal('mark-attendance'); document.getElementById('ma-roster').style.display='none'; document.getElementById('ma-date').valueAsDate = new Date();"
+              style="flex:1; max-width:200px; background-color: #00b894;">👥 Student Attendance</button>
+          </div>
+        </div>
+      </div>
+      <div class="page" id="page-results">
+        <div class="page-placeholder">
+          <div class="page-icon">⭐</div>
+          <h2>Results</h2>
+          <p>Publish and view exam results.</p>
+
+          <div style="display:flex; justify-content:center; gap: 10px; margin-top:20px;">
+            <button class="btn-primary" onclick="toggleResultsPanel('publish')" style="max-width: 200px;">
+              ⭐ Publish Results
+            </button>
+
+            <button class="btn-primary" onclick="toggleResultsPanel('view')" style="max-width: 200px;">
+              🔍 View Result
+            </button>
+          </div>
+
+          <!-- Inline Selection Panel (Hidden by default) -->
+          <div id="results-selection-panel"
+            style="display:none; margin-top: 30px; text-align: left; background: #f8fafc; padding: 24px; border-radius: 12px; border: 1px solid #e2e8f0; width: 100%; max-width: 450px; margin-left: auto; margin-right: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+
+            <h3 id="panel-title"
+              style="margin-bottom: 20px; font-size: 1.1rem; font-weight: 700; color: #1e293b; text-align: center;">
+              Selection Required
+            </h3>
+
+            <div style="margin-bottom: 15px;">
+              <label style="display:block; margin-bottom:8px; font-weight:600; font-size:14px; color:#475569;">Select
+                Class</label>
+              <select id="res-select-class"
+                style="width:100%; padding:10px 14px; border-radius:8px; border:1px solid #cbd5e1; font-family: inherit;">
+                <!-- Dynamically loaded -->
+              </select>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+              <label style="display:block; margin-bottom:8px; font-weight:600; font-size:14px; color:#475569;">Select
+                Term</label>
+              <select id="res-select-term"
+                style="width:100%; padding:10px 14px; border-radius:8px; border:1px solid #cbd5e1; font-family: inherit;">
+                <option value="">-- Select Class First --</option>
+              </select>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+              <button class="btn-secondary"
+                onclick="document.getElementById('results-selection-panel').style.display='none'"
+                style="flex: 1;">Cancel</button>
+              <button id="res-panel-btn" class="btn-primary" style="flex: 2;"
+                onclick="executeResultAction()">Proceed</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-overlay" id="modal-publish-result">
+        <div class="modal">
+
+          <div class="modal-header">
+            <div class="modal-title">⭐ Publish Result</div>
+            <button class="modal-close" onclick="closeModal('publish-result')">✕</button>
+          </div>
+
+          <label>Select Class</label>
+          <select id="publish-class">
+            <!-- Dynamically loaded -->
+          </select>
+
+          <label>Select Term</label>
+          <select id="publish-term">
+            <option value="">-- Select Class First --</option>
+          </select>
+
+          <div class="modal-footer">
+            <button class="btn-secondary" onclick="closeModal('publish-result')">Cancel</button>
+            <button class="btn-primary" onclick="publishResults()">Publish</button>
+          </div>
+
+        </div>
+      </div>
+
+    </div> <!-- Close content -->
+  </div> <!-- Close main -->
+
+  <!-- ═══════════ MODALS ═══════════ -->
+  <!-- Add Student -->
+  <div class="modal-overlay" id="modal-add-student">
+    <div class="modal">
+
+      <div class="modal-header">
+        <div class="modal-title">➕ Add New Student</div>
+        <button class="modal-close" onclick="closeModal('add-student')">✕</button>
+      </div>
+
+      <label>Full Name</label>
+      <input type="text" id="add-student-name" placeholder="e.g. Umar Farooq" />
+
+      <label>Class</label>
+      <select id="add-student-class">
+        <option>Class 1A</option>
+...
+      </select>
+
+      <label>Roll Number</label>
+      <input type="text" id="add-student-roll" placeholder="e.g. 1042" />
+
+      <label>Date of Birth</label>
+      <input type="date" id="add-student-dob" />
+
+      <label>Guardian Name</label>
+      <input type="text" id="add-student-guardian" placeholder="e.g. Farooq Ahmed" />
+
+      <label>Student Email (Login ID)</label>
+      <input type="email" id="add-student-email" placeholder="e.g. student@school.com" />
+
+      <label>Login Password</label>
+      <div style="position: relative;">
+        <input type="password" id="add-student-password" placeholder="e.g. student123" style="width: 100%;" />
+        <span id="toggle-student-pass" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; opacity: 0.6;">
+            👁️
+        </span>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeModal('add-student')">
+          Cancel
+        </button>
+
+        <button class="btn-primary" onclick="submitForm('add-student', 'Student added successfully!')">
+          Add Student
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Delete Student -->
+  <div class="modal-overlay" id="modal-delete-student">
+    <div class="modal">
+
+      <div class="modal-header">
+        <div class="modal-title">🗑 Delete Student</div>
+
+        <button class="modal-close" onclick="closeModal('delete-student')">
+          ✕
+        </button>
+      </div>
+
+      <label>Class</label>
+      <select>
+        <option>Class 1A</option>
+        <option>Class 1B</option>
+        <option>Class 2A</option>
+        <option>Class 2B</option>
+        <option>Class 3A</option>
+        <option>Class 3B</option>
+        <option>Class 4A</option>
+        <option>Class 4B</option>
+        <option>Class 5A</option>
+        <option>Class 5B</option>
+        <option>Class 6A</option>
+        <option>Class 6B</option>
+        <option>Class 7A</option>
+        <option>Class 7B</option>
+        <option>Class 8A</option>
+        <option>Class 8B</option>
+        <option>Class 9A</option>
+        <option>Class 9B</option>
+        <option>Class 10A</option>
+        <option>Class 10B</option>
+      </select>
+
+      <label>Roll Number</label>
+      <input type="text" placeholder="e.g. 1042" />
+
+      <label>Student Name</label>
+      <input type="text" placeholder="e.g. Umar Farooq" />
+
+      <label>Guardian Name</label>
+      <input type="text" placeholder="e.g. Farooq Ahmed" />
+
+      <div class="modal-footer">
+
+        <button class="btn-secondary" onclick="closeModal('delete-student')">
+          Cancel
+        </button>
+
+        <button class="btn-primary" onclick="submitForm('delete-student', 'Student deleted successfully!')">
+          Delete Student
+        </button>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Add Teacher -->
+  <div class="modal-overlay" id="modal-add-teacher">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">➕ Add New Teacher</div>
+        <button class="modal-close" onclick="closeModal('add-teacher')">✕</button>
+      </div>
+      <label>Full Name</label>
+      <input type="text" placeholder="e.g. Mr. Bilal" />
+      <label>Email</label>
+      <input type="email" placeholder="teacher@school.com" />
+
+      <label>Phone Number</label>
+      <input type="tel" placeholder="+92 300 1234567" />
+
+      <label>Login Password</label>
+      <div style="position: relative;">
+        <input type="password" placeholder="e.g. teacher123" id="add-teacher-password" style="width: 100%;" />
+        <span id="toggle-teacher-pass" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; opacity: 0.6;">
+            👁️
+        </span>
+      </div>
+
+      <div style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 15px;">
+        <label style="font-weight: 600;">Assignments</label>
+        <div id="teacher-assignments-list" style="margin-bottom: 10px;"></div>
+        <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+          <select id="assign-class-select" style="flex: 1;" onchange="loadClassSubjectsForAssign(this.value)">
+            <option value="">-- Select Class --</option>
+          </select>
+          <select id="assign-subject-select" style="flex: 1;">
+            <option value="">-- Select Subject --</option>
+          </select>
+          <button type="button" class="btn-primary" onclick="addAssignmentToList()" style="padding: 5px 10px; font-size: 12px; width: auto;">Add</button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeModal('add-teacher')">Cancel</button>
+        <button class="btn-primary" onclick="submitForm('add-teacher', 'Teacher added successfully!')">Add
+          Teacher</button>
+      </div>
+    </div>
+  </div>
+  <!-- Delete Teacher -->
+  <div class="modal-overlay" id="modal-delete-teacher">
+    <div class="modal">
+
+      <div class="modal-header">
+        <div class="modal-title">🗑 Delete Teacher</div>
+
+        <button class="modal-close" onclick="closeModal('delete-teacher')">
+          ✕
+        </button>
+      </div>
+
+      <label>Phone Number</label>
+      <input type="tel" placeholder="+92 300 1234567" />
+
+      <label>Teacher Name</label>
+      <input type="text" placeholder="e.g. Mr. Bilal" />
+
+      <div class="modal-footer">
+
+        <button class="btn-secondary" onclick="closeModal('delete-teacher')">
+          Cancel
+        </button>
+
+        <button class="btn-primary" onclick="submitForm('delete-teacher', 'Teacher deleted successfully!')">
+          Delete Teacher
+        </button>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Create Class -->
+  <div class="modal-overlay" id="modal-create-class">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">📖 Create New Class</div>
+        <button class="modal-close" onclick="closeModal('create-class')">✕</button>
+      </div>
+      <label>Class Name</label>
+      <input type="text" placeholder="e.g. Class 10A" />
+
+      <label>Max Students</label>
+      <input type="number" value="30" />
+
+      <label>Subjects (comma separated)</label>
+      <input type="text" placeholder="e.g. Mathematics, Physics, English" id="class-subjects-input" />
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeModal('create-class')">Cancel</button>
+        <button class="btn-primary" onclick="submitForm('create-class', 'Class created successfully!')">Create
+          Class</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- View Result Modal -->
+  <div class="modal-overlay" id="modal-view-result">
+    <div class="modal">
+
+      <div class="modal-header">
+        <div class="modal-title">🔍 View Result</div>
+        <button class="modal-close" onclick="closeModal('view-result')">✕</button>
+      </div>
+
+      <div id="check-result-form">
+
+        <!-- CLASS -->
+        <label>Class</label>
+        <select id="vr-class">
+          <!-- Dynamically loaded -->
+        </select>
+
+        <!-- TERM -->
+        <label>Term</label>
+        <select id="vr-term">
+          <option value="">-- Select Class First --</option>
+        </select>
+
+        <div class="modal-footer">
+          <button class="btn-secondary" onclick="closeModal('view-result')">Cancel</button>
+          <button class="btn-primary" onclick="checkResult()">Check Result</button>
+        </div>
+
+      </div>
+
+      <!-- Result Display (Dynamic Table) -->
+      <div id="result-display" style="display:none; padding:15px; border-radius:10px; background:#f8fafc; border:1px solid #e2e8f0; width: 100%; max-width: 600px;">
+        <h3 style="font-size:1rem; margin-bottom:10px; color:#1e293b;">Performance Overview</h3>
+        <p style="font-size:0.85rem; color:#475569; margin-bottom:15px;">
+          <strong>Exam:</strong> <span id="res-exam"></span>
+        </p>
+
+        <div style="overflow-x: auto;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;" id="results-table">
+            <thead>
+              <tr style="text-align: left; border-bottom: 2px solid #e2e8f0;">
+                <th style="padding: 10px 5px;">Roll No</th>
+                <th style="padding: 10px 5px;">Student Name</th>
+                <th style="padding: 10px 5px;">Subject</th>
+                <th style="padding: 10px 5px; text-align: center;">Marks</th>
+                <th style="padding: 10px 5px; text-align: center;">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Results loaded here -->
+            </tbody>
+          </table>
+        </div>
+
+        <button class="btn-secondary"
+          onclick="document.getElementById('result-display').style.display='none'; document.getElementById('check-result-form').style.display='block';"
+          style="width:100%; margin-top:20px;">
+          Search Another Result
+        </button>
+      </div>
+
+    </div>
+  </div>
+  <!-- Teacher Attendance Modal -->
+  <div class="modal-overlay" id="modal-teacher-attendance">
+    <div class="modal" style="width: 500px;">
+      <div class="modal-header">
+        <div class="modal-title">👨‍🏫 Mark Teacher Attendance</div>
+        <button class="modal-close" onclick="closeModal('teacher-attendance')">✕</button>
+      </div>
+
+      <div id="ta-filters" style="display:flex; gap:10px; margin-bottom:15px; align-items:flex-end;">
+        <div style="flex:1">
+          <label style="margin-top:0;">Date</label>
+          <input type="date" id="ta-date" style="padding: 8.5px 12px; width: 100%; box-sizing: border-box;" />
+        </div>
+        <button class="btn-secondary" onclick="loadTeacherRoster()"
+          style="padding: 9.5px 18px; white-space:nowrap; border:1px solid #d1d5db; background:#f8fafc; flex-shrink:0;">Load
+          Teachers</button>
+      </div>
+
+      <!-- Hidden Teacher Roster -->
+      <div id="ta-roster" style="display:none; border-top:1px solid #e2e8f0; padding-top:18px; margin-top:10px;">
+        <h3 style="font-size:0.9rem; margin-bottom:12px; color:#334155; font-weight:700;">Teacher Staff List</h3>
+        <div style="max-height: 250px; overflow-y: auto; padding-right:5px;">
+          <table style="width:100%; border-collapse:collapse; font-size:0.87rem;">
+            <thead>
+              <tr style="text-align:left; border-bottom:1.5px solid #e2e8f0; color:#64748b;">
+                <th style="padding-bottom:10px;">ID</th>
+                <th style="padding-bottom:10px;">Teacher Name</th>
+                <th style="padding-bottom:10px; text-align:center;">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-bottom:1px solid #f1f5f9;">
+                <td style="padding:12px 0;">T-01</td>
+                <td style="padding:12px 0; font-weight:600; color:#0f172a;">Ms. Sarah Johnson</td>
+                <td style="padding:12px 0; text-align:center; white-space:nowrap;">
+                  <label style="margin:0 5px; cursor:pointer;"><input type="radio" name="tatt-1"> P</label>
+                  <label style="margin:0 5px; cursor:pointer;"><input type="radio" name="tatt-1"> A</label>
+                  <label style="margin:0 5px; cursor:pointer;"><input type="radio" name="tatt-1"> L</label>
+                </td>
+              </tr>
+              <tr style="border-bottom:1px solid #f1f5f9;">
+                <td style="padding:12px 0;">T-02</td>
+                <td style="padding:12px 0; font-weight:600; color:#0f172a;">Mr. Bilal Ahmed</td>
+                <td style="padding:12px 0; text-align:center; white-space:nowrap;">
+                  <label style="margin:0 5px; cursor:pointer;"><input type="radio" name="tatt-2"> P</label>
+                  <label style="margin:0 5px; cursor:pointer;"><input type="radio" name="tatt-2"> A</label>
+                  <label style="margin:0 5px; cursor:pointer;"><input type="radio" name="tatt-2"> L</label>
+                </td>
+              </tr>
+              <tr style="border-bottom:1px solid #f1f5f9;">
+                <td style="padding:12px 0;">T-03</td>
+                <td style="padding:12px 0; font-weight:600; color:#0f172a;">Mrs. Ayesha Khan</td>
+                <td style="padding:12px 0; text-align:center; white-space:nowrap;">
+                  <label style="margin:0 5px; cursor:pointer;"><input type="radio" name="tatt-3"> P</label>
+                  <label style="margin:0 5px; cursor:pointer;"><input type="radio" name="tatt-3"> A</label>
+                  <label style="margin:0 5px; cursor:pointer;"><input type="radio" name="tatt-3"> L</label>
+                </td>
+              </tr>
+              <tr style="border-bottom:1px solid #f1f5f9;">
+                <td style="padding:12px 0;">T-04</td>
+                <td style="padding:12px 0; font-weight:600; color:#0f172a;">Mr. Tariq Mehmood</td>
+                <td style="padding:12px 0; text-align:center; white-space:nowrap;">
+                  <label style="margin:0 5px; cursor:pointer;"><input type="radio" name="tatt-4"> P</label>
+                  <label style="margin:0 5px; cursor:pointer;"><input type="radio" name="tatt-4"> A</label>
+                  <label style="margin:0 5px; cursor:pointer;"><input type="radio" name="tatt-4"> L</label>
+                </td>
+              </tr>
+              <tr style="border-bottom:1px solid #f1f5f9;">
+                <td style="padding:12px 0;">T-05</td>
+                <td style="padding:12px 0; font-weight:600; color:#0f172a;">Ms. Fatima Ali</td>
+                <td style="padding:12px 0; text-align:center; white-space:nowrap;">
+                  <label style="margin:0 5px; cursor:pointer;"><input type="radio" name="tatt-5"> P</label>
+                  <label style="margin:0 5px; cursor:pointer;"><input type="radio" name="tatt-5"> A</label>
+                  <label style="margin:0 5px; cursor:pointer;"><input type="radio" name="tatt-5"> L</label>
+                </td>
+              </tr>
+              <tr style="border-bottom:1px solid #f1f5f9;">
+                <td style="padding:12px 0;">T-06</td>
+                <td style="padding:12px 0; font-weight:600; color:#0f172a;">Mr. Usman Tariq</td>
+                <td style="padding:12px 0; text-align:center; white-space:nowrap;">
+                  <label style="margin:0 5px; cursor:pointer;"><input type="radio" name="tatt-6"> P</label>
+                  <label style="margin:0 5px; cursor:pointer;"><input type="radio" name="tatt-6"> A</label>
+                  <label style="margin:0 5px; cursor:pointer;"><input type="radio" name="tatt-6"> L</label>
+                </td>
+              </tr>
+              <tr style="border-bottom:1px solid #f1f5f9;">
+                <td style="padding:12px 0;">T-07</td>
+                <td style="padding:12px 0; font-weight:600; color:#0f172a;">Mrs. Zainab Qureshi</td>
+                <td style="padding:12px 0; text-align:center; white-space:nowrap;">
+                  <label style="margin:0 5px; cursor:pointer;"><input type="radio" name="tatt-7"> P</label>
+                  <label style="margin:0 5px; cursor:pointer;"><input type="radio" name="tatt-7"> A</label>
+                  <label style="margin:0 5px; cursor:pointer;"><input type="radio" name="tatt-7"> L</label>
+                </td>
+              </tr>
+              <tr style="border-bottom:1px solid #f1f5f9;">
+                <td style="padding:12px 0;">T-08</td>
+                <td style="padding:12px 0; font-weight:600; color:#0f172a;">Mr. Omar Farooq</td>
+                <td style="padding:12px 0; text-align:center; white-space:nowrap;">
+                  <label style="margin:0 5px; cursor:pointer;"><input type="radio" name="tatt-8"> P</label>
+                  <label style="margin:0 5px; cursor:pointer;"><input type="radio" name="tatt-8"> A</label>
+                  <label style="margin:0 5px; cursor:pointer;"><input type="radio" name="tatt-8"> L</label>
+                </td>
+              </tr>
+              <tr style="border-bottom:1px solid #f1f5f9;">
+                <td style="padding:12px 0;">T-09</td>
+                <td style="padding:12px 0; font-weight:600; color:#0f172a;">Ms. Hira Saeed</td>
+                <td style="padding:12px 0; text-align:center; white-space:nowrap;">
+                  <label style="margin:0 5px; cursor:pointer;"><input type="radio" name="tatt-9"> P</label>
+                  <label style="margin:0 5px; cursor:pointer;"><input type="radio" name="tatt-9"> A</label>
+                  <label style="margin:0 5px; cursor:pointer;"><input type="radio" name="tatt-9"> L</label>
+                </td>
+              </tr>
+              <tr style="border-bottom:1px solid #f1f5f9;">
+                <td style="padding:12px 0;">T-10</td>
+                <td style="padding:12px 0; font-weight:600; color:#0f172a;">Mr. Kamran Shah</td>
+                <td style="padding:12px 0; text-align:center; white-space:nowrap;">
+                  <label style="margin:0 5px; cursor:pointer;"><input type="radio" name="tatt-10"> P</label>
+                  <label style="margin:0 5px; cursor:pointer;"><input type="radio" name="tatt-10"> A</label>
+                  <label style="margin:0 5px; cursor:pointer;"><input type="radio" name="tatt-10"> L</label>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="modal-footer" style="margin-top:24px;">
+          <button class="btn-secondary" onclick="closeModal('teacher-attendance')">Cancel</button>
+          <button class="btn-primary" onclick="submitTeacherAttendance()">Save Permanently</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Manage Assignments Modal (for individual rows) -->
+  <div class="modal-overlay" id="modal-manage-assignments">
+    <div class="modal" style="width: 500px;">
+      <div class="modal-header">
+        <div class="modal-title">🎯 Manage Teacher Assignments</div>
+        <button class="modal-close" onclick="closeModal('manage-assignments')">✕</button>
+      </div>
+
+      <div style="background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 20px;">
+        <label style="margin-top:0;">Class</label>
+        <select id="manage-assign-class-select" onchange="loadClassSubjectsForManage(this.value)">
+          <!-- Dynamic -->
+        </select>
+
+        <label>Subject</label>
+        <select id="manage-assign-subject-select">
+          <option value="">-- Select Subject --</option>
+        </select>
+
+        <button class="btn-primary" onclick="addAssignmentToManageList()" style="margin-top:15px; background:#6366f1;">+ Add Assignment</button>
+      </div>
+
+      <h3 style="font-size:0.85rem; margin-bottom:10px; color:#64748b; font-weight:600;">Current Assignments:</h3>
+      <div id="manage-assignments-list" style="min-height: 100px; padding: 10px; border: 1.5px dashed #cbd5e1; border-radius: 10px; margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 5px;">
+        <!-- Tags here -->
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeModal('manage-assignments')">Cancel</button>
+        <button class="btn-primary" onclick="saveTeacherAssignments()">Save All Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Assign Modal (from top button) -->
+  <div class="modal-overlay" id="modal-assign-teacher">
+    <div class="modal" style="width: 500px;">
+      <div class="modal-header">
+        <div class="modal-title">🎯 Quick Assignment</div>
+        <button class="modal-close" onclick="closeModal('assign-teacher')">✕</button>
+      </div>
+
+      <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0;">
+        <label style="margin-top:0;">Select Teacher</label>
+        <select id="quick-assign-teacher-select">
+          <!-- Dynamic -->
+        </select>
+
+        <label>Select Class</label>
+        <select id="quick-assign-class-select" onchange="loadClassSubjectsForQuick(this.value)">
+          <!-- Dynamic -->
+        </select>
+
+        <label>Select Subject</label>
+        <select id="quick-assign-subject-select">
+          <option value="">-- Select Subject --</option>
+        </select>
+
+        <div class="modal-footer" style="margin-top:20px;">
+          <button class="btn-secondary" onclick="closeModal('assign-teacher')">Cancel</button>
+          <button class="btn-primary" onclick="submitQuickAssignment()">Confirm Assignment</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mark Attendance Modal -->
+  <div class="modal-overlay" id="modal-mark-attendance">
+    <div class="modal" style="width: 540px;">
+      <div class="modal-header">
+        <div class="modal-title">👥 Review Student Attendance</div>
+        <button class="modal-close" onclick="closeModal('mark-attendance')">✕</button>
+      </div>
+
+      <div id="ma-filters" style="display:flex; gap:10px; margin-bottom:15px; align-items:flex-end;">
+        <div style="flex:1">
+          <label style="margin-top:0;">Date</label>
+          <input type="date" id="ma-date" style="padding: 8.5px 12px;" />
+        </div>
+        <div style="flex:1">
+          <label style="margin-top:0;">Class</label>
+          <select id="ma-class" style="padding: 8.5px 12px;">
+            <option>Class 1</option>
+            <option>Class 2</option>
+            <option>Class 3</option>
+            <option>Class 4</option>
+            <option>Class 5</option>
+            <option>Class 6</option>
+            <option>Class 7</option>
+            <option>Class 8</option>
+            <option>Class 9</option>
+            <option>Class 10</option>
+          </select>
+        </div>
+        <button class="btn-secondary" onclick="loadAttendanceRoster()"
+          style="padding: 9.5px 18px; white-space:nowrap; border:1px solid #d1d5db; background:#f8fafc; flex-shrink:0;">Load
+          Roster</button>
+      </div>
+
+      <!-- Hidden Student Roster -->
+      <div id="ma-roster" style="display:none; border-top:1px solid #e2e8f0; padding-top:18px; margin-top:10px;">
+        <h3 style="font-size:0.9rem; margin-bottom:12px; color:#334155; font-weight:700;">Student Roster</h3>
+        <div style="max-height: 250px; overflow-y: auto; padding-right:5px;">
+          <table style="width:100%; border-collapse:collapse; font-size:0.87rem;">
+            <thead>
+              <tr style="text-align:left; border-bottom:1.5px solid #e2e8f0; color:#64748b;">
+                <th style="padding-bottom:10px;">Roll No</th>
+                <th style="padding-bottom:10px;">Student Name</th>
+                <th style="padding-bottom:10px; text-align:center;">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Data will be loaded dynamically -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="modal-footer" style="margin-top:24px;">
+          <button class="btn-secondary" onclick="closeModal('mark-attendance')">Cancel</button>
+          <button class="btn-primary" onclick="submitAttendance()">Save Permanently</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ TOAST ═══════════ -->
+  <div class="toast" id="toast">
+    <span class="toast-icon" id="toastIcon"></span>
+    <span id="toastMsg"></span>
+  </div>
+
+  <!-- ═══════════ JAVASCRIPT ═══════════ -->
+
+</body>
+<script src="../../js/Admin/admin.js"></script>
+
+</html>

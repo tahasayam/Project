@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduManage - Login</title>
+
+    <link rel="stylesheet" href="../css/login/style.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+
+    <main class="login-container">
+
+        <div class="login-card">
+
+            <header class="card-header">
+
+                <div class="logo-wrapper">
+
+                    <img src="https://tse2.mm.bing.net/th/id/OIP.3NutcxKMKBdxY9JVw5NeugHaHa?w=2000&h=2000&rs=1&pid=ImgDetMain&o=7&rm=3"
+                        alt="EduManage Logo" class="brand-logo">
+
+                    <div class="brand-info">
+                        <h1 class="brand-name">EduManage</h1>
+                        <p class="brand-tagline">School Management System</p>
+                    </div>
+
+                </div>
+
+                <div class="welcome-section">
+                    <h2 class="welcome-title">Login</h2>
+                    <p class="welcome-subtitle">
+                        Please enter your credentials to access your account.
+                    </p>
+                </div>
+
+            </header>
+
+            <form class="login-form">
+
+                <!-- Email -->
+                <div class="form-group">
+
+                    <label for="email" class="input-label">Email</label>
+
+                    <input type="email"
+                        id="email"
+                        class="form-input"
+                        placeholder="Enter your email address"
+                        required>
+
+                </div>
+
+                <!-- Password -->
+                <div class="form-group">
+
+                    <label for="password" class="input-label">Password</label>
+
+                    <div style="position: relative;">
+
+                        <input type="password"
+                            id="password"
+                            class="form-input"
+                            placeholder="Enter your password"
+                            required
+                            style="padding-right: 48px;">
+
+                        <button type="button"
+                            id="togglePassword"
+                            style="
+                                position: absolute;
+                                right: 12px;
+                                top: 50%;
+                                transform: translateY(-50%);
+                                background: none;
+                                border: none;
+                                cursor: pointer;
+                                color: #667085;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                            ">
+
+                            <!-- EMPTY SVG -->
+                            <svg id="eyeIcon"
+                                viewBox="0 0 24 24"
+                                width="20"
+                                height="20"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                fill="none"
+                                stroke-linecap="round"
+                                stroke-linejoin="round">
+                            </svg>
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <a href="#" class="forgot-password">Forgot Password?</a>
+
+                <button type="submit" class="submit-btn">
+                    Log In
+                </button>
+
+                <div class="divider">
+                    <span>Or</span>
+                </div>
+
+                <button type="button" class="google-btn">
+
+                    <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png"
+                        alt="Google"
+                        class="google-icon">
+
+                    <span>Login with Google</span>
+
+                </button>
+
+            </form>
+
+            <p class="footer-text">
+                Don't have an account?
+                <a href="#" class="signup-link">Sign up</a>
+            </p>
+
+        </div>
+
+    </main>
+
+    <script src="../js/login/login.js"></script>
+
+</body>
+
+</html>

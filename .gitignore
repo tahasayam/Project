@@ -1,0 +1,6 @@
+node_modules/
+.env
+.vscode/
+backend/node_modules/
+backend/.env
+backend/scratch/

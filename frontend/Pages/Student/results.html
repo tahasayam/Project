@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SchoolMS - My Results</title>
+    <link rel="stylesheet" href="../../css/student/results.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="https://tse2.mm.bing.net/th/id/OIP.3NutcxKMKBdxY9JVw5NeugHaHa?w=2000&h=2000&rs=1&pid=ImgDetMain&o=7&rm=3" alt="SchoolMS Logo" class="sidebar-logo">
+                <span class="sidebar-brand">SchoolMS</span>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="attendance.html" class="nav-item">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21Z" stroke="currentColor" stroke-width="2"/><path d="M12 7V12L15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                    <span>Attendance</span>
+                </a>
+                <a href="results.html" class="nav-item active">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 12L11 14L15 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2"/></svg>
+                    <span>Results</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="user-avatar" style="background-color: #3b82f6;">J</div>
+                    <div class="user-info">
+                        <p class="user-name">Loading...</p>
+                        <p class="user-role">Student</p>
+                    </div>
+                </div>
+                <a href="#" class="sign-out">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 17L21 12L16 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 12H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <span>Sign Out</span>
+                </a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="main-header" style="justify-content: flex-end;">
+                <a href="../login.html" style="padding: 8px 16px; background-color: #1a1a2e; color: white; text-decoration: none; border-radius: 8px; font-weight: 500; font-size: 14px; display: inline-flex; align-items: center; transition: background 0.2s;">
+                    ⬅ Back to Login
+                </a>
+            </header>
+
+            <section class="results-section">
+                <div class="results-header">
+                    <h1 class="dashboard-title">Academic Results</h1>
+                    <p class="dashboard-subtitle" id="welcome-message">Check your term-wise performance reports</p>
+                </div>
+
+                <div class="stats-grid" style="grid-template-columns: 1fr;">
+                    <div class="stat-card" style="flex-direction: column; gap: 20px; padding: 30px;">
+                        <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+                            <div>
+                                <p class="stat-label">Results Summary</p>
+                                <h3 class="stat-value" id="result-status">Ready to View</h3>
+                                <p style="font-size: 14px; color: #64748b; margin-top: 4px;">Click the button below to fetch published scores.</p>
+                            </div>
+                            <div class="stat-icon-wrapper blue" style="width: 70px; height: 70px; background-color: #eff6ff; color: #3b82f6; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                                <svg style="width: 35px; height: 35px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>
+                            </div>
+                        </div>
+
+                        <div style="width: 100%; border-top: 1px solid #eaecf0; padding-top: 20px;">
+                            <button id="view-results-btn" style="width: 100%; padding: 14px; background-color: #3b82f6; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 16px; transition: background 0.2s;">
+                                View Published Results
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="results-container" style="margin-top: 30px; display: none; flex-direction: column; gap: 15px;">
+                    <!-- Results will be injected here -->
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="../../js/student/results.js"></script>
+</body>
+</html>

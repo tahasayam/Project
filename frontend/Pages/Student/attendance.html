@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SchoolMS - My Attendance</title>
+    <link rel="stylesheet" href="../../css/student/attendance.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="https://tse2.mm.bing.net/th/id/OIP.3NutcxKMKBdxY9JVw5NeugHaHa?w=2000&h=2000&rs=1&pid=ImgDetMain&o=7&rm=3" alt="SchoolMS Logo" class="sidebar-logo">
+                <span class="sidebar-brand">SchoolMS</span>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="attendance.html" class="nav-item active">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21Z" stroke="currentColor" stroke-width="2"/><path d="M12 7V12L15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                    <span>Attendance</span>
+                </a>
+                <a href="results.html" class="nav-item">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 12L11 14L15 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2"/></svg>
+                    <span>Results</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="user-avatar" style="background-color: #3b82f6;">J</div>
+                    <div class="user-info">
+                        <p class="user-name">Loading...</p>
+                        <p class="user-role">Student</p>
+                    </div>
+                </div>
+                <a href="#" class="sign-out">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 17L21 12L16 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 12H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <span>Sign Out</span>
+                </a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="main-header" style="justify-content: flex-end;">
+                <a href="../login.html" style="padding: 8px 16px; background-color: #1a1a2e; color: white; text-decoration: none; border-radius: 8px; font-weight: 500; font-size: 14px; display: inline-flex; align-items: center; transition: background 0.2s;">
+                    ⬅ Back to Login
+                </a>
+            </header>
+
+            <section class="attendance-section">
+                <div class="attendance-header">
+                    <h1 class="dashboard-title">My Attendance</h1>
+                    <p class="dashboard-subtitle" id="welcome-message">Welcome back! — Tracking your attendance</p>
+                </div>
+
+                <div class="stats-grid" style="grid-template-columns: 1fr;">
+                    <div class="stat-card" style="flex-direction: column; gap: 24px; padding: 32px;">
+                        <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+                            <div>
+                                <p class="stat-label" style="font-size: 16px;">Attendance Percentage</p>
+                                <h3 class="stat-value" id="attendance-percent" style="font-size: 48px; margin: 10px 0;">0%</h3>
+                                <p id="attendance-month-label" style="font-size: 16px; color: #64748b;">Latest Month</p>
+                            </div>
+                            <div class="stat-icon-wrapper" style="width: 80px; height: 80px; background-color: #ecfdf5; color: #10b981;">
+                                <svg style="width: 40px; height: 40px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8V12L15 15" stroke-linecap="round"/><circle cx="12" cy="12" r="9"/></svg>
+                            </div>
+                        </div>
+                        
+                        <div style="width: 100%; border-top: 1px solid #eaecf0; padding-top: 24px;">
+                            <label for="month-select" style="font-size: 14px; font-weight: 600; display: block; margin-bottom: 12px; color: #344054;">Select Particular Month:</label>
+                            <select id="month-select" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #d0d5dd; font-family: inherit; font-size: 16px; background-color: white;">
+                                <option value="latest">Latest Month</option>
+                                <option value="1">January</option>
+                                <option value="2">February</option>
+                                <option value="3">March</option>
+                                <option value="4">April</option>
+                                <option value="5">May</option>
+                                <option value="6">June</option>
+                                <option value="7">July</option>
+                                <option value="8">August</option>
+                                <option value="9">September</option>
+                                <option value="10">October</option>
+                                <option value="11">November</option>
+                                <option value="12">December</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="monthly-breakdown-card" style="margin-top: 32px;">
+                    <h3 class="section-title">Detailed Summary</h3>
+                    <div id="attendance-summary" style="padding: 20px; text-align: center; color: #64748b;">
+                        Please select a month to view details.
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="../../js/student/attendance.js"></script>
+</body>
+</html>
