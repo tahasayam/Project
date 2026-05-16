@@ -1,4 +1,4 @@
-const { poolPromise, sql } = require('../Config/db');
+const { poolPromise } = require('../Config/db');
 
 // POST /api/results/add
 // Teacher adds marks for a student
@@ -10,31 +10,19 @@ const addResult = async (req, res) => {
     try {
         const pool = await poolPromise;
 
-        const classRes = await pool.request()
-            .input('sid', sql.Int, studentID)
-            .query('SELECT ClassID FROM Students WHERE StudentID = @sid');
-        const classID = classRes.recordset[0]?.ClassID;
-        const tableName = await getResultTable(pool, classID);
+        // Using single 'school_results' table as per schema.sql
+        const tableName = 'school_results';
 
         // Upsert: remove existing and re-insert so teacher can update marks
-        await pool.request()
-            .input('studentID', sql.Int, studentID)
-            .input('subjectName', sql.NVarChar, subjectName)
-            .input('term', sql.NVarChar, term)
-            .query(`DELETE FROM ${tableName} WHERE StudentID = @studentID AND SubjectName = @subjectName AND Term = @term`);
+        await pool.query(
+            `DELETE FROM ${tableName} WHERE student_id = $1 AND subject_name = $2 AND term = $3`,
+            [studentID, subjectName, term]
+        );
 
-        await pool.request()
-            .input('studentID', sql.Int, studentID)
-            .input('subjectName', sql.NVarChar, subjectName)
-            .input('term', sql.NVarChar, term)
-            .input('marksObtained', sql.Decimal(5, 2), marksObtained)
-            .input('totalMarks', sql.Decimal(5, 2), totalMarks)
-            .query(`
-                INSERT INTO ${tableName} (StudentID, SubjectName, Term, MarksObtained, TotalMarks, IsPublished, StudentName, ClassName, Section)
-                SELECT @studentID, @subjectName, @term, @marksObtained, @totalMarks, 0, FullName, ClassName, Section
-                FROM Students
-                WHERE StudentID = @studentID
-            `);
+        await pool.query(`
+                INSERT INTO school_results (student_id, subject_name, term, marks, total_marks, is_published)
+                VALUES ($1, $2, $3, $4, $5, FALSE)
+            `, [studentID, subjectName, term, marksObtained, totalMarks]);
 
         res.status(201).json({ message: 'Marks saved successfully.' });
     } catch (err) {
@@ -52,17 +40,14 @@ const publishResults = async (req, res) => {
     }
     try {
         const pool = await poolPromise;
-        const tableName = await getResultTable(pool, classID);
-        const result = await pool.request()
-            .input('classID', sql.Int, classID)
-            .input('term', sql.NVarChar, term)
-            .query(`
-                UPDATE ${tableName} SET IsPublished = 1
-                WHERE Term = @term
-                AND StudentID IN (SELECT StudentID FROM Students WHERE ClassID = @classID)
-            `);
+        
+        const result = await pool.query(`
+                UPDATE school_results SET is_published = TRUE
+                WHERE term = $1
+                AND student_id IN (SELECT id FROM school_students WHERE class_id = $2)
+            `, [term, classID]);
 
-        res.json({ message: `Results published for term '${term}'.`, affected: result.rowsAffected[0] });
+        res.json({ message: `Results published for term '${term}'.`, affected: result.rowCount });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
@@ -74,19 +59,15 @@ const getClassResults = async (req, res) => {
     const { classID, term } = req.params;
     try {
         const pool = await poolPromise;
-        const tableName = await getResultTable(pool, classID);
-        const result = await pool.request()
-            .input('classID', sql.Int, classID)
-            .input('term', sql.NVarChar, term)
-            .query(`
-                SELECT s.StudentID, s.RollNo, s.FullName,
-                       r.SubjectName, r.MarksObtained, r.TotalMarks, r.IsPublished, r.Term
-                FROM Students s
-                LEFT JOIN ${tableName} r ON r.StudentID = s.StudentID AND r.Term = @term
-                WHERE s.ClassID = @classID
-                ORDER BY s.RollNo
-            `);
-        res.json(result.recordset);
+        const result = await pool.query(`
+                SELECT s.id as "StudentID", s.roll_no as "RollNo", s.fullname as "FullName",
+                       r.subject_name as "SubjectName", r.marks as "MarksObtained", r.total_marks as "TotalMarks", r.is_published as "IsPublished", r.term as "Term"
+                FROM school_students s
+                LEFT JOIN school_results r ON r.student_id = s.id AND r.term = $1
+                WHERE s.class_id = $2
+                ORDER BY s.roll_no
+            `, [term, classID]);
+        res.json(result.rows);
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
@@ -98,21 +79,14 @@ const getStudentResults = async (req, res) => {
     const { studentID } = req.params;
     try {
         const pool = await poolPromise;
-        const classRes = await pool.request()
-            .input('sid', sql.Int, studentID)
-            .query('SELECT ClassID FROM Students WHERE StudentID = @sid');
-        const classID = classRes.recordset[0]?.ClassID;
-        const tableName = await getResultTable(pool, classID);
 
-        const result = await pool.request()
-            .input('studentID', sql.Int, studentID)
-            .query(`
-                SELECT ResultID, SubjectName, Term, MarksObtained, TotalMarks
-                FROM ${tableName}
-                WHERE StudentID = @studentID AND IsPublished = 1
-                ORDER BY Term, SubjectName
-            `);
-        res.json(result.recordset);
+        const result = await pool.query(`
+                SELECT id as "ResultID", subject_name as "SubjectName", term as "Term", marks as "MarksObtained", total_marks as "TotalMarks"
+                FROM school_results
+                WHERE student_id = $1 AND is_published = TRUE
+                ORDER BY term, subject_name
+            `, [studentID]);
+        res.json(result.rows);
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
@@ -124,34 +98,16 @@ const getAvailableTerms = async (req, res) => {
     const { classID } = req.params;
     try {
         const pool = await poolPromise;
-        const tableName = await getResultTable(pool, classID);
-        const result = await pool.request()
-            .input('classID', sql.Int, classID)
-            .query(`
-                SELECT DISTINCT Term 
-                FROM ${tableName} 
-                WHERE StudentID IN (SELECT StudentID FROM Students WHERE ClassID = @classID)
-                ORDER BY Term
-            `);
-        res.json(result.recordset.map(row => row.Term));
+        const result = await pool.query(`
+                SELECT DISTINCT term 
+                FROM school_results 
+                WHERE student_id IN (SELECT id FROM school_students WHERE class_id = $1)
+                ORDER BY term
+            `, [classID]);
+        res.json(result.rows.map(row => row.term));
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
 };
-// Helper to get the correct result table name based on ClassID
-async function getResultTable(pool, classID) {
-    const result = await pool.request()
-        .input('cid', sql.Int, classID)
-        .query('SELECT ClassName FROM Classes WHERE ClassID = @cid');
-    
-    if (result.recordset.length === 0) return 'ResultClass1'; // Fallback
-    
-    const className = result.recordset[0].ClassName;
-    const gradeMatch = className.match(/\d+/);
-    const gradeLevel = gradeMatch ? parseInt(gradeMatch[0]) : 1;
-    
-    const level = Math.min(Math.max(gradeLevel, 1), 10);
-    return `ResultClass${level}`;
-}
 
 module.exports = { addResult, publishResults, getClassResults, getStudentResults, getAvailableTerms };

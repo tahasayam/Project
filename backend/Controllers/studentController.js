@@ -1,18 +1,18 @@
-const { poolPromise, sql } = require('../Config/db');
+const { poolPromise } = require('../Config/db');
 const bcrypt = require('bcryptjs');
 
 // GET /api/students/all
 const getAllStudents = async (req, res) => {
     try {
         const pool = await poolPromise;
-        const result = await pool.request().query(`
-            SELECT s.StudentID, s.RollNo, s.FullName, s.DOB, s.GuardianName, s.Email,
-                   c.ClassName, c.ClassID, u.Username
-            FROM Students s
-            LEFT JOIN Classes c ON s.ClassID = c.ClassID
-            LEFT JOIN Users u ON u.UserID = s.UserID
+        const result = await pool.query(`
+            SELECT s.id as "StudentID", s.roll_no as "RollNo", s.fullname as "FullName", s.dob as "DOB", s.guardian_name as "GuardianName", s.email as "Email",
+                   c.classname as "ClassName", c.id as "ClassID", u.username as "Username"
+            FROM school_students s
+            LEFT JOIN school_classes c ON s.class_id = c.id
+            LEFT JOIN school_auth u ON u.id = s.auth_id
         `);
-        res.json(result.recordset);
+        res.json(result.rows);
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
@@ -23,10 +23,11 @@ const getStudentsByClass = async (req, res) => {
     const { classID } = req.params;
     try {
         const pool = await poolPromise;
-        const result = await pool.request()
-            .input('classID', sql.Int, classID)
-            .query('SELECT StudentID, RollNo, FullName FROM Students WHERE ClassID = @classID ORDER BY RollNo');
-        res.json(result.recordset);
+        const result = await pool.query(
+            'SELECT id as "StudentID", roll_no as "RollNo", fullname as "FullName" FROM school_students WHERE class_id = $1 ORDER BY roll_no',
+            [classID]
+        );
+        res.json(result.rows);
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
@@ -45,45 +46,39 @@ const addStudent = async (req, res) => {
         const pool = await poolPromise;
 
         // Check duplicate roll number
-        const dupRoll = await pool.request()
-            .input('rollNo', sql.NVarChar, rollNo)
-            .query('SELECT StudentID FROM Students WHERE RollNo = @rollNo');
-        if (dupRoll.recordset.length > 0) {
+        const dupRoll = await pool.query(
+            'SELECT id FROM school_students WHERE roll_no = $1',
+            [rollNo]
+        );
+        if (dupRoll.rows.length > 0) {
             return res.status(400).json({ message: `Roll No '${rollNo}' already exists.` });
         }
 
-        // Check duplicate email (Username in Users table)
-        const dupEmail = await pool.request()
-            .input('email', sql.NVarChar, email)
-            .query('SELECT UserID FROM Users WHERE Username = @email');
-        if (dupEmail.recordset.length > 0) {
+        // Check duplicate email (Username in school_auth table)
+        const dupEmail = await pool.query(
+            'SELECT id FROM school_auth WHERE username = $1',
+            [email]
+        );
+        if (dupEmail.rows.length > 0) {
             return res.status(400).json({ message: `Email '${email}' is already in use.` });
         }
 
         // Hash provided password
         const hashedPwd = await bcrypt.hash(password, 10);
 
-        // Insert into Users
-        const userResult = await pool.request()
-            .input('username', sql.NVarChar, email)
-            .input('password', sql.NVarChar, hashedPwd)
-            .input('role', sql.NVarChar, 'Student')
-            .query('INSERT INTO Users (Username, Password, Role) OUTPUT INSERTED.UserID VALUES (@username, @password, @role)');
+        // Insert into school_auth
+        const userResult = await pool.query(
+            'INSERT INTO school_auth (username, password, role) VALUES ($1, $2, $3) RETURNING id',
+            [email, hashedPwd, 'Student']
+        );
 
-        const newUserID = userResult.recordset[0].UserID;
+        const newUserID = userResult.rows[0].id;
 
-        // Insert into Students
-        await pool.request()
-            .input('rollNo', sql.NVarChar, rollNo)
-            .input('fullName', sql.NVarChar, fullName)
-            .input('classID', sql.Int, classID)
-            .input('dob', sql.Date, dob || null)
-            .input('guardianName', sql.NVarChar, guardianName || null)
-            .input('userID', sql.Int, newUserID)
-            .input('className', sql.NVarChar, className || '')
-            .input('section', sql.NVarChar, section || '')
-            .input('email', sql.NVarChar, email)
-            .query('INSERT INTO Students (RollNo, FullName, ClassID, DOB, GuardianName, UserID, ClassName, Section, Email) VALUES (@rollNo, @fullName, @classID, @dob, @guardianName, @userID, @className, @section, @email)');
+        // Insert into school_students
+        await pool.query(
+            'INSERT INTO school_students (roll_no, fullname, class_id, dob, guardian_name, auth_id, class_name, section, email) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)',
+            [rollNo, fullName, classID, dob || null, guardianName || null, newUserID, className || '', section || '', email]
+        );
 
         res.status(201).json({ message: `Student added successfully. Login: ${email}` });
     } catch (err) {
@@ -97,26 +92,22 @@ const deleteStudent = async (req, res) => {
     try {
         const pool = await poolPromise;
 
-        const studentResult = await pool.request()
-            .input('rollNo', sql.NVarChar, rollNo)
-            .query('SELECT StudentID, UserID FROM Students WHERE RollNo = @rollNo');
+        const studentResult = await pool.query(
+            'SELECT id as "StudentID", auth_id as "UserID" FROM school_students WHERE roll_no = $1',
+            [rollNo]
+        );
 
-        if (studentResult.recordset.length === 0) {
+        if (studentResult.rows.length === 0) {
             return res.status(404).json({ message: 'Student not found.' });
         }
 
-        // Deleting the user will cascade delete student (due to CASCADE on StudentID)
-        const userID = studentResult.recordset[0].UserID;
-        const studentID = studentResult.recordset[0].StudentID;
+        const userID = studentResult.rows[0].UserID;
+        const studentID = studentResult.rows[0].StudentID;
         
         if (userID) {
-            await pool.request()
-                .input('userID', sql.Int, userID)
-                .query('DELETE FROM Users WHERE UserID = @userID');
+            await pool.query('DELETE FROM school_auth WHERE id = $1', [userID]);
         } else {
-            await pool.request()
-                .input('studentID', sql.Int, studentID)
-                .query('DELETE FROM Students WHERE StudentID = @studentID');
+            await pool.query('DELETE FROM school_students WHERE id = $1', [studentID]);
         }
 
         res.json({ message: 'Student deleted successfully.' });
@@ -129,17 +120,15 @@ const deleteStudent = async (req, res) => {
 const getStudentProfile = async (req, res) => {
     try {
         const pool = await poolPromise;
-        const result = await pool.request()
-            .input('userID', sql.Int, req.user.id)
-            .query(`
-                SELECT s.StudentID, s.RollNo, s.FullName, s.DOB, s.GuardianName,
-                       c.ClassName, c.ClassID
-                FROM Students s
-                LEFT JOIN Classes c ON s.ClassID = c.ClassID
-                WHERE s.UserID = @userID
-            `);
-        if (result.recordset.length === 0) return res.status(404).json({ message: 'Student profile not found' });
-        res.json(result.recordset[0]);
+        const result = await pool.query(`
+                SELECT s.id as "StudentID", s.roll_no as "RollNo", s.fullname as "FullName", s.dob as "DOB", s.guardian_name as "GuardianName",
+                       c.classname as "ClassName", c.id as "ClassID"
+                FROM school_students s
+                LEFT JOIN school_classes c ON s.class_id = c.id
+                WHERE s.auth_id = $1
+            `, [req.user.id]);
+        if (result.rows.length === 0) return res.status(404).json({ message: 'Student profile not found' });
+        res.json(result.rows[0]);
     } catch (err) {
         res.status(500).json({ message: err.message });
     }

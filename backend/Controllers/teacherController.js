@@ -1,24 +1,23 @@
-const { poolPromise, sql } = require('../Config/db');
+const { poolPromise } = require('../Config/db');
 const bcrypt = require('bcryptjs');
 
 // GET /api/teachers/all
 const getAllTeachers = async (req, res) => {
     try {
         const pool = await poolPromise;
-        const result = await pool.request().query(`
-            SELECT t.TeacherID, t.FullName, t.Subject, t.AssignedClasses, t.Email, t.PhoneNo,
-                   u.Username
-            FROM Teachers t
-            LEFT JOIN Users u ON u.UserID = t.UserID
+        const result = await pool.query(`
+            SELECT t.id as "TeacherID", t.fullname as "FullName", t.subject_specialty as "Subject", t.assigned_classes as "AssignedClasses", t.email as "Email", t.phone as "PhoneNo",
+                   u.username as "Username"
+            FROM staff_teachers t
+            LEFT JOIN school_auth u ON u.id = t.auth_id
         `);
-        res.json(result.recordset);
+        res.json(result.rows);
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
 };
 
 // POST /api/teachers/add
-// Auto-creates a User account for the teacher (email = login username)
 const addTeacher = async (req, res) => {
     const { fullName, email, phoneNo, password, assignments } = req.body;
     if (!fullName || !email || !phoneNo || !password) {
@@ -27,69 +26,60 @@ const addTeacher = async (req, res) => {
     try {
         const pool = await poolPromise;
 
-        // Check duplicate email in Users
-        const dup = await pool.request()
-            .input('email', sql.NVarChar, email)
-            .query('SELECT UserID FROM Users WHERE Username = @email');
-        if (dup.recordset.length > 0) {
+        // Check duplicate email in school_auth
+        const dup = await pool.query('SELECT id FROM school_auth WHERE username = $1', [email]);
+        if (dup.rows.length > 0) {
             return res.status(400).json({ message: 'A user with this email already exists.' });
         }
 
         // Hash the provided password
         const hashedPwd = await bcrypt.hash(password, 10);
 
-        // Insert into Users
-        const userResult = await pool.request()
-            .input('username', sql.NVarChar, email)
-            .input('password', sql.NVarChar, hashedPwd)
-            .input('role', sql.NVarChar, 'Teacher')
-            .query('INSERT INTO Users (Username, Password, Role) OUTPUT INSERTED.UserID VALUES (@username, @password, @role)');
+        // Insert into school_auth
+        const userResult = await pool.query(
+            'INSERT INTO school_auth (username, password, role) VALUES ($1, $2, $3) RETURNING id',
+            [email, hashedPwd, 'Teacher']
+        );
 
-        const newUserID = userResult.recordset[0].UserID;
+        const newUserID = userResult.rows[0].id;
 
-        const teacherResult = await pool.request()
-            .input('fullName', sql.NVarChar, fullName)
-            .input('subject', sql.NVarChar, req.body.subject || null)
-            .input('email', sql.NVarChar, email)
-            .input('phoneNo', sql.NVarChar, phoneNo)
-            .input('userID', sql.Int, newUserID)
-            .query('INSERT INTO Teachers (FullName, Subject, Email, PhoneNo, UserID) OUTPUT INSERTED.TeacherID VALUES (@fullName, @subject, @email, @phoneNo, @userID)');
+        const teacherResult = await pool.query(
+            'INSERT INTO staff_teachers (fullname, subject_specialty, email, phone, auth_id) VALUES ($1, $2, $3, $4, $5) RETURNING id',
+            [fullName, req.body.subject || null, email, phoneNo, newUserID]
+        );
 
-        const teacherID = teacherResult.recordset[0].TeacherID;
+        const teacherID = teacherResult.rows[0].id;
 
         // Add Assignments
         if (assignments && Array.isArray(assignments)) {
             for (const ass of assignments) {
-                await pool.request()
-                    .input('tid', sql.Int, teacherID)
-                    .input('cid', sql.Int, ass.classID)
-                    .input('sid', sql.Int, ass.subjectID)
-                    .query('INSERT INTO TeacherAssignments (TeacherID, ClassID, SubjectID) VALUES (@tid, @cid, @sid)');
+                await pool.query(
+                    'INSERT INTO TeacherAssignments (TeacherID, ClassID, SubjectID) VALUES ($1, $2, $3)',
+                    [teacherID, ass.classID, ass.subjectID]
+                );
             }
 
-            // --- NEW: Update the Teacher's summary columns ---
-            await pool.request()
-                .input('tid', sql.Int, teacherID)
-                .query(`
-                    UPDATE Teachers 
+            // Update the Teacher's summary columns
+            await pool.query(`
+                    UPDATE staff_teachers 
                     SET 
-                        Subject = (
-                            SELECT STRING_AGG(s.SubjectName, ', ') 
-                            FROM TeacherAssignments ta
-                            JOIN Subjects s ON ta.SubjectID = s.SubjectID
-                            WHERE ta.TeacherID = @tid
+                        subject_specialty = (
+                            SELECT STRING_AGG(s.subjectname, ', ') 
+                            FROM teacher_assignments_map ta
+                            JOIN school_subjects s ON ta.subject_id = s.id
+                            WHERE ta.teacher_id = $1
                         ),
-                        AssignedClasses = (
-                            SELECT STRING_AGG(ClassName, ', ') 
+                        assigned_classes = (
+                            SELECT STRING_AGG(classname, ', ') 
                             FROM (
-                                SELECT DISTINCT c.ClassName 
-                                FROM TeacherAssignments ta
-                                JOIN Classes c ON ta.ClassID = c.ClassID
-                                WHERE ta.TeacherID = @tid
+                                SELECT DISTINCT c.classname 
+                                FROM teacher_assignments_map ta
+                                JOIN school_classes c ON ta.class_id = c.id
+                                WHERE ta.teacher_id = $1
                             ) AS ClassSub
                         )
-                    WHERE TeacherID = @tid
-                `);
+                    WHERE id = $1
+                `, [teacherID]);
         }
 
         res.status(201).json({ message: `Teacher added successfully.` });
@@ -99,39 +89,32 @@ const addTeacher = async (req, res) => {
 };
 
 // DELETE /api/teachers/delete/:phoneNo
-// Delete by Name + PhoneNo (as per your scenario)
 const deleteTeacher = async (req, res) => {
     const { phoneNo } = req.params;
     try {
         const pool = await poolPromise;
 
-        // Get the userID linked to this teacher
-        const teacherResult = await pool.request()
-            .input('phoneNo', sql.NVarChar, phoneNo)
-            .query('SELECT TeacherID, UserID FROM Teachers WHERE PhoneNo = @phoneNo');
+        const teacherResult = await pool.query(
+            'SELECT id as "TeacherID", auth_id as "UserID" FROM staff_teachers WHERE phone = $1',
+            [phoneNo]
+        );
 
-        if (teacherResult.recordset.length === 0) {
+        if (teacherResult.rows.length === 0) {
             return res.status(404).json({ message: 'Teacher not found.' });
         }
 
-        const userID = teacherResult.recordset[0].UserID;
-        const teacherID = teacherResult.recordset[0].TeacherID;
+        const userID = teacherResult.rows[0].UserID;
+        const teacherID = teacherResult.rows[0].TeacherID;
 
         // Delete assignments first
-        await pool.request()
-            .input('teacherID', sql.Int, teacherID)
-            .query('DELETE FROM TeacherAssignments WHERE TeacherID = @teacherID');
+        await pool.query('DELETE FROM teacher_assignments_map WHERE teacher_id = $1', [teacherID]);
 
         // Delete teacher record
-        await pool.request()
-            .input('teacherID', sql.Int, teacherID)
-            .query('DELETE FROM Teachers WHERE TeacherID = @teacherID');
+        await pool.query('DELETE FROM staff_teachers WHERE id = $1', [teacherID]);
 
         // Delete user account
         if (userID) {
-            await pool.request()
-                .input('userID', sql.Int, userID)
-                .query('DELETE FROM Users WHERE UserID = @userID');
+            await pool.query('DELETE FROM school_auth WHERE id = $1', [userID]);
         }
 
         res.json({ message: 'Teacher deleted successfully.' });
@@ -140,41 +123,43 @@ const deleteTeacher = async (req, res) => {
     }
 };
 
-// GET /api/teachers/profile  (Teacher logs in and gets their own profile)
+// GET /api/teachers/profile
 const getTeacherProfile = async (req, res) => {
     try {
         const pool = await poolPromise;
-        const profileResult = await pool.request()
-            .input('userID', sql.Int, req.user.id)
-            .query('SELECT * FROM Teachers WHERE UserID = @userID');
+        const profileResult = await pool.query('SELECT * FROM staff_teachers WHERE auth_id = $1', [req.user.id]);
         
-        if (profileResult.recordset.length === 0) return res.status(404).json({ message: 'Teacher profile not found' });
-        const teacher = profileResult.recordset[0];
+        if (profileResult.rows.length === 0) return res.status(404).json({ message: 'Teacher profile not found' });
+        const teacher = profileResult.rows[0];
 
-        const assignmentsResult = await pool.request()
-            .input('tid', sql.Int, teacher.TeacherID)
-            .query(`
-                SELECT c.ClassID, c.ClassName, s.SubjectID, s.SubjectName,
-                       (SELECT COUNT(*) FROM Students st WHERE st.ClassID = c.ClassID) as StudentCount
-                FROM TeacherAssignments ta
-                JOIN Classes c ON ta.ClassID = c.ClassID
-                JOIN Subjects s ON ta.SubjectID = s.SubjectID
-                WHERE ta.TeacherID = @tid
-            `);
+        // Access properties safely
+        const tid = teacher.id;
+
+        const assignmentsResult = await pool.query(`
+                SELECT c.id as "ClassID", c.classname as "ClassName", s.id as "SubjectID", s.subjectname as "SubjectName",
+                       (SELECT COUNT(*) FROM school_students st WHERE st.class_id = c.id) as "StudentCount"
+                FROM teacher_assignments_map ta
+                JOIN school_classes c ON ta.class_id = c.id
+                JOIN school_subjects s ON ta.subject_id = s.id
+                WHERE ta.teacher_id = $1
+            `, [tid]);
         
-        const studentCountResult = await pool.request()
-            .input('tid', sql.Int, teacher.TeacherID)
-            .query(`
-                SELECT COUNT(DISTINCT s.StudentID) AS TotalStudents
-                FROM Students s
-                JOIN TeacherAssignments ta ON s.ClassID = ta.ClassID
-                WHERE ta.TeacherID = @tid
-            `);
+        const studentCountResult = await pool.query(`
+                SELECT COUNT(DISTINCT s.id) AS totalstudents
+                FROM school_students s
+                JOIN teacher_assignments_map ta ON s.class_id = ta.class_id
+                WHERE ta.teacher_id = $1
+            `, [tid]);
 
         res.json({
-            ...teacher,
-            Assignments: assignmentsResult.recordset,
-            StudentCount: studentCountResult.recordset[0].TotalStudents
+            teacherid: tid,
+            FullName: teacher.fullname,
+            Subject: teacher.subject_specialty,
+            Email: teacher.email,
+            PhoneNo: teacher.phone,
+            AssignedClasses: teacher.assigned_classes,
+            Assignments: assignmentsResult.rows,
+            StudentCount: parseInt(studentCountResult.rows[0].totalstudents)
         });
     } catch (err) {
         res.status(500).json({ message: err.message });
@@ -186,47 +171,40 @@ const updateTeacherAssignments = async (req, res) => {
     try {
         const pool = await poolPromise;
         
-        // Delete existing assignments ONLY if not appending
         if (!append) {
-            await pool.request()
-                .input('tid', sql.Int, teacherID)
-                .query('DELETE FROM TeacherAssignments WHERE TeacherID = @tid');
+            await pool.query('DELETE FROM teacher_assignments_map WHERE teacher_id = $1', [teacherID]);
         }
 
-        // Add new assignments
         if (assignments && Array.isArray(assignments)) {
             for (const ass of assignments) {
-                await pool.request()
-                    .input('tid', sql.Int, teacherID)
-                    .input('cid', sql.Int, ass.classID)
-                    .input('sid', sql.Int, ass.subjectID)
-                    .query('INSERT INTO TeacherAssignments (TeacherID, ClassID, SubjectID) VALUES (@tid, @cid, @sid)');
+                await pool.query(
+                    'INSERT INTO teacher_assignments_map (teacher_id, class_id, subject_id) VALUES ($1, $2, $3)',
+                    [teacherID, ass.classID, ass.subjectID]
+                );
             }
         }
 
         // Update summary columns
-        await pool.request()
-            .input('tid', sql.Int, teacherID)
-            .query(`
-                UPDATE Teachers 
+        await pool.query(`
+                UPDATE staff_teachers 
                 SET 
-                    Subject = (
-                        SELECT STRING_AGG(s.SubjectName, ', ') 
-                        FROM TeacherAssignments ta
-                        JOIN Subjects s ON ta.SubjectID = s.SubjectID
-                        WHERE ta.TeacherID = @tid
+                    subject_specialty = (
+                        SELECT STRING_AGG(s.subjectname, ', ') 
+                        FROM teacher_assignments_map ta
+                        JOIN school_subjects s ON ta.subject_id = s.id
+                        WHERE ta.teacher_id = $1
                     ),
-                    AssignedClasses = (
-                        SELECT STRING_AGG(ClassName, ', ') 
+                    assigned_classes = (
+                        SELECT STRING_AGG(classname, ', ') 
                         FROM (
-                            SELECT DISTINCT c.ClassName 
-                            FROM TeacherAssignments ta
-                            JOIN Classes c ON ta.ClassID = c.ClassID
-                            WHERE ta.TeacherID = @tid
+                            SELECT DISTINCT c.classname 
+                            FROM teacher_assignments_map ta
+                            JOIN school_classes c ON ta.class_id = c.id
+                            WHERE ta.teacher_id = $1
                         ) AS ClassSub
                     )
-                WHERE TeacherID = @tid
-            `);
+                WHERE id = $1
+            `, [teacherID]);
 
         res.json({ message: 'Assignments updated successfully' });
     } catch (err) {

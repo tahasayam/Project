@@ -1,4 +1,4 @@
-const { poolPromise, sql } = require('../Config/db');
+const { poolPromise } = require('../Config/db');
 
 // GET /api/admin/stats
 // Returns total students, teachers, and active classes for the dashboard
@@ -6,14 +6,14 @@ const getDashboardStats = async (req, res) => {
     try {
         const pool = await poolPromise;
 
-        const studentsResult = await pool.request().query('SELECT COUNT(*) AS Total FROM Students');
-        const teachersResult = await pool.request().query('SELECT COUNT(*) AS Total FROM Teachers');
-        const classesResult  = await pool.request().query('SELECT COUNT(*) AS Total FROM Classes');
+        const studentsResult = await pool.query('SELECT COUNT(*) AS total FROM school_students');
+        const teachersResult = await pool.query('SELECT COUNT(*) AS total FROM staff_teachers');
+        const classesResult  = await pool.query('SELECT COUNT(*) AS total FROM school_classes');
 
         res.json({
-            totalStudents: studentsResult.recordset[0].Total,
-            totalTeachers: teachersResult.recordset[0].Total,
-            totalClasses:  classesResult.recordset[0].Total,
+            totalStudents: parseInt(studentsResult.rows[0].total),
+            totalTeachers: parseInt(teachersResult.rows[0].total),
+            totalClasses:  parseInt(classesResult.rows[0].total),
         });
     } catch (err) {
         res.status(500).json({ message: err.message });

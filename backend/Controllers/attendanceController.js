@@ -1,4 +1,4 @@
-const { poolPromise, sql } = require('../Config/db');
+const { poolPromise } = require('../Config/db');
 
 // POST /api/attendance/mark
 // Marks attendance for multiple students or teachers
@@ -11,48 +11,33 @@ const markAttendance = async (req, res) => {
 
     try {
         const pool = await poolPromise;
-        let tableName = 'TeacherAttendance';
-        let idColumn = 'TeacherID';
+        let tableName = 'teacher_attendance_log';
+        let idColumn = 'teacher_id';
 
         if (targetType === 'Student') {
-            idColumn = 'StudentID';
+            idColumn = 'student_id';
             // Need to find the class of the first student to determine the table
             const firstStudentID = records[0]?.targetID;
             if (firstStudentID) {
-                const classRes = await pool.request()
-                    .input('sid', sql.Int, firstStudentID)
-                    .query('SELECT ClassID FROM Students WHERE StudentID = @sid');
-                const classID = classRes.recordset[0]?.ClassID;
+                const classRes = await pool.query('SELECT class_id FROM school_students WHERE id = $1', [firstStudentID]);
+                const classID = classRes.rows[0]?.class_id;
                 tableName = await getStudentAttendanceTable(pool, classID);
             } else {
-                tableName = 'StudentAttendanceClass1';
+                tableName = 'att_class_1';
             }
         }
 
         for (const rec of records) {
             // Upsert: delete existing for same day then insert
-            await pool.request()
-                .input('date', sql.Date, date)
-                .input('id', sql.Int, rec.targetID)
-                .query(`DELETE FROM ${tableName} WHERE Date = @date AND ${idColumn} = @id`);
+            await pool.query(`DELETE FROM ${tableName} WHERE log_date = $1 AND ${idColumn} = $2`, [date, rec.targetID]);
 
             if (targetType === 'Student') {
-                await pool.request()
-                    .input('date', sql.Date, date)
-                    .input('status', sql.NVarChar, rec.status)
-                    .input('id', sql.Int, rec.targetID)
-                    .query(`
-                        INSERT INTO ${tableName} (Date, Status, ${idColumn}, StudentName, ClassName, Section) 
-                        SELECT @date, @status, @id, FullName, ClassName, Section 
-                        FROM Students 
-                        WHERE StudentID = @id
-                    `);
+                await pool.query(`
+                        INSERT INTO ${tableName} (log_date, status, ${idColumn}) 
+                        VALUES ($1, $2, $3)
+                    `, [date, rec.status, rec.targetID]);
             } else {
-                await pool.request()
-                    .input('date', sql.Date, date)
-                    .input('status', sql.NVarChar, rec.status)
-                    .input('id', sql.Int, rec.targetID)
-                    .query(`INSERT INTO ${tableName} (Date, Status, ${idColumn}) VALUES (@date, @status, @id)`);
+                await pool.query(`INSERT INTO ${tableName} (log_date, status, ${idColumn}) VALUES ($1, $2, $3)`, [date, rec.status, rec.targetID]);
             }
         }
 
@@ -70,38 +55,38 @@ const getAttendanceStats = async (req, res) => {
         const pool = await poolPromise;
         
         // Find the class to get the table name
-        const classRes = await pool.request()
-            .input('sid', sql.Int, studentID)
-            .query('SELECT ClassID FROM Students WHERE StudentID = @sid');
-        const classID = classRes.recordset[0]?.ClassID;
+        const classRes = await pool.query('SELECT class_id FROM school_students WHERE id = $1', [studentID]);
+        const classID = classRes.rows[0]?.class_id;
         const tableName = await getStudentAttendanceTable(pool, classID);
 
-        const result = await pool.request()
-            .input('sid', sql.Int, studentID)
-            .input('month', sql.Int, month)
-            .input('year', sql.Int, new Date().getFullYear())
-            .query(`
+        const result = await pool.query(`
                 SELECT
-                    COUNT(*) AS TotalDays,
-                    SUM(CASE WHEN Status = 'Present' THEN 1 ELSE 0 END) AS PresentDays,
-                    SUM(CASE WHEN Status = 'Absent' THEN 1 ELSE 0 END) AS AbsentDays,
-                    SUM(CASE WHEN Status = 'Leave' THEN 1 ELSE 0 END) AS LeaveDays
+                    COUNT(*) AS totaldays,
+                    SUM(CASE WHEN status = 'Present' THEN 1 ELSE 0 END) AS presentdays,
+                    SUM(CASE WHEN status = 'Absent' THEN 1 ELSE 0 END) AS absentdays,
+                    SUM(CASE WHEN status = 'Leave' THEN 1 ELSE 0 END) AS leavedays
                 FROM ${tableName}
-                WHERE StudentID = @sid 
-                  AND MONTH(Date) = @month 
-                  AND YEAR(Date) = @year
-                  AND (DATEDIFF(day, 0, Date) % 7) != 6
-            `);
-        const stats = result.recordset[0];
-        const percent = stats.TotalDays > 0
-            ? Math.round(((stats.PresentDays + stats.LeaveDays) / stats.TotalDays) * 100)
+                WHERE student_id = $1 
+                  AND EXTRACT(MONTH FROM log_date) = $2 
+                  AND EXTRACT(YEAR FROM log_date) = $3
+                  AND EXTRACT(DOW FROM log_date) != 0
+            `, [studentID, month, new Date().getFullYear()]);
+        
+        const stats = result.rows[0];
+        const total = parseInt(stats.totaldays || 0);
+        const present = parseInt(stats.presentdays || 0);
+        const absent = parseInt(stats.absentdays || 0);
+        const leave = parseInt(stats.leavedays || 0);
+
+        const percent = total > 0
+            ? Math.round(((present + leave) / total) * 100)
             : 0;
         res.json({ 
             percent, 
-            totalDays: stats.TotalDays, 
-            presentDays: stats.PresentDays,
-            absentDays: stats.AbsentDays,
-            leaveDays: stats.LeaveDays
+            totalDays: total, 
+            presentDays: present,
+            absentDays: absent,
+            leaveDays: leave
         });
     } catch (err) {
         res.status(500).json({ message: err.message });
@@ -116,18 +101,15 @@ const viewStudentAttendanceByDate = async (req, res) => {
         const pool = await poolPromise;
         const tableName = await getStudentAttendanceTable(pool, classID);
         
-        const result = await pool.request()
-            .input('classID', sql.Int, classID)
-            .input('date', sql.Date, date)
-            .query(`
-                SELECT s.StudentID, s.RollNo, s.FullName, a.Status
-                FROM Students s
-                LEFT JOIN ${tableName} a ON a.StudentID = s.StudentID
-                    AND a.Date = @date
-                WHERE s.ClassID = @classID
-                ORDER BY s.RollNo
-            `);
-        res.json(result.recordset);
+        const result = await pool.query(`
+                SELECT s.id as "StudentID", s.roll_no as "RollNo", s.fullname as "FullName", a.status as "Status"
+                FROM school_students s
+                LEFT JOIN ${tableName} a ON a.student_id = s.id
+                    AND a.log_date = $1
+                WHERE s.class_id = $2
+                ORDER BY s.roll_no
+            `, [date, classID]);
+        res.json(result.rows);
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
@@ -135,19 +117,17 @@ const viewStudentAttendanceByDate = async (req, res) => {
 
 // Helper to get the correct attendance table name based on ClassID
 async function getStudentAttendanceTable(pool, classID) {
-    const result = await pool.request()
-        .input('cid', sql.Int, classID)
-        .query('SELECT ClassName FROM Classes WHERE ClassID = @cid');
+    const result = await pool.query('SELECT classname as "ClassName" FROM school_classes WHERE id = $1', [classID]);
     
-    if (result.recordset.length === 0) return 'StudentAttendanceClass1'; // Fallback
+    if (result.rows.length === 0) return 'att_class_1'; // Fallback
     
-    const className = result.recordset[0].ClassName;
+    const className = result.rows[0].ClassName || result.rows[0].classname;
     const gradeMatch = className.match(/\d+/);
     const gradeLevel = gradeMatch ? parseInt(gradeMatch[0]) : 1;
     
     // Ensure grade level is between 1 and 10
     const level = Math.min(Math.max(gradeLevel, 1), 10);
-    return `StudentAttendanceClass${level}`;
+    return `att_class_${level}`;
 }
 
 module.exports = { markAttendance, getAttendanceStats, viewStudentAttendanceByDate };

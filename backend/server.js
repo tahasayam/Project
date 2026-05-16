@@ -17,32 +17,9 @@ const resultRoutes = require('./Routes/resultRoutes');
 const app = express();
 
 // Middleware
-const allowedOrigins = [
-    'http://localhost:5500', 
-    'http://127.0.0.1:5500',
-    process.env.FRONTEND_URL // Vercel URL will be added here on Render
-].filter(Boolean);
-
-app.use(cors({
-    origin: function (origin, callback) {
-        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
-        }
-    },
-    credentials: true
-}));
+app.use(cors()); // Allow all for local troubleshooting
 app.use(morgan('dev'));
 app.use(express.json());
-
-// Serve static files
-app.use(express.static(path.join(__dirname, '../frontend')));
-
-// Root route to serve the login page
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/Pages/login.html'));
-});
 
 // Register Project Routes
 app.use('/api/auth', authRoutes);
@@ -53,12 +30,20 @@ app.use('/api/attendance', attendanceRoutes);
 app.use('/api/classes', classRoutes);
 app.use('/api/results', resultRoutes);
 
+// Serve static files
+app.use(express.static(path.join(__dirname, '../frontend')));
+
+// Root route to serve the login page
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/Pages/login.html'));
+});
+
 // Health Check Route
 app.get('/health', async (req, res) => {
     try {
         const pool = await poolPromise;
         if (!pool) throw new Error("Database pool not initialized");
-        await pool.request().query('SELECT 1');
+        await pool.query('SELECT 1');
         res.json({ status: "OK", database: "Connected" });
     } catch (err) {
         console.error('❌ Health check failed:', err.message);
