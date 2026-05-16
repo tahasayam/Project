@@ -54,7 +54,7 @@ const addTeacher = async (req, res) => {
         if (assignments && Array.isArray(assignments)) {
             for (const ass of assignments) {
                 await pool.query(
-                    'INSERT INTO TeacherAssignments (TeacherID, ClassID, SubjectID) VALUES ($1, $2, $3)',
+                    'INSERT INTO teacher_assignments_map (teacher_id, class_id, subject_id) VALUES ($1, $2, $3)',
                     [teacherID, ass.classID, ass.subjectID]
                 );
             }
