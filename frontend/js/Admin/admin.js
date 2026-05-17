@@ -741,7 +741,8 @@ async function submitAttendance() {
       closeModal("mark-attendance");
       showToast("✅", "Student attendance saved successfully!");
     } else {
-      showToast("❌", "Failed to save attendance.");
+      const errData = await res.json();
+      showToast("❌", errData.message || "Failed to save attendance.");
     }
   } catch (error) {
     showToast("❌", "Connection error");
@@ -839,7 +840,8 @@ async function submitTeacherAttendance() {
       showToast("✅", "Teacher attendance saved successfully!");
       document.getElementById("ta-roster").style.display = "none";
     } else {
-      showToast("❌", "Failed to mark attendance.");
+      const errData = await res.json();
+      showToast("❌", errData.message || "Failed to mark attendance.");
     }
   } catch(e) {
     showToast("❌", "Connection error");
